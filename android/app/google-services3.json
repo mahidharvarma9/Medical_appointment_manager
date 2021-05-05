@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "310302282915",
+    "project_id": "leso123-8b446",
+    "storage_bucket": "leso123-8b446.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:310302282915:android:17ee5ae906655fdf06db16",
+        "android_client_info": {
+          "package_name": "com.example.leso123"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "310302282915-f5mmk6eg6gipgkte9el7l971q0q60tnf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2rOkRxMfaGs-51CM7G-PF-lo2lBar_LU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "310302282915-f5mmk6eg6gipgkte9el7l971q0q60tnf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
