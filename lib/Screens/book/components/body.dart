@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:leso/Screens/administrator/admin_homepage.dart';
+import '../../administrator/admin_homepage.dart';
 import '../../Department/department.dart';
 import '../../Login/components/background.dart';
-import '/main.dart';
+import '../../../main.dart';
 import '../../Signup/signup_screen.dart';
 import '../../../components/already_have_an_account_acheck.dart';
 import '../../../components/rounded_button.dart';
@@ -29,6 +29,12 @@ class _BodyState extends State<Body> {
   // const Body({
   //   Key key,
   // }) : super(key: key);
+  signOut() async {
+    print("signout..");
+
+    print("signout.."+FirebaseAuth.instance.currentUser.email);
+    await FirebaseAuth.instance.signOut();
+  }
   Future<bool> _onBackPressed() {
     return showDialog(
         context: context,
@@ -73,51 +79,63 @@ class _BodyState extends State<Body> {
               RoundedButton(
                 color: button,
                 text: "Book Appointment",
+
                 press: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return MyStatefulWidget();
-                      },
-                    ),
-                  );
+                  print(FirebaseAuth.instance.currentUser.email);
+                  if(flag==1) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return MyStatefulWidget();
+                        },
+                      ),
+                    );
+                  }
+                  else{
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text("Alert "),
+                        content: Text("Please create your Profile first"),
+                        actions: <Widget>[
+
+                          FlatButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop();
+
+                            },
+
+                            child: Text("Okay"),
+                          )
+                        ],
+                      ),
+                    );
+                  }
                 },
               ),
+
               SizedBox(height: size.height * 0.03),
               RoundedButton(
-                color: button,
-                text: "View/Cancel Bookings",
-                press: () {
-                  HttpClient()
-                      .getUrl(Uri.parse(
-                      'http://us-central1-first-outlet-307908.cloudfunctions.net/fun_caller?name=' +
-                          currentFirebaseUser.email +
-                          "|" +
-                          DateTime.now().toString() +
-                          "|" +
-                          Departmant +
-                          "|" +
-                          "5"))
-                      .then((request) => request.close()) // sends the request
-                      .then((response) => response
-                      .transform(Utf8Decoder())
-                      .listen(print)); // transforms and prints the response
-                },
-              ),
-              SizedBox(height: size.height * 0.03),
-              RoundedButton(
-                color: button,
+                color: Colors.red,
                 text: "Logout",
                 press: () async {
-                  await FirebaseAuth.instance.signOut();
-                  Navigator.pushReplacement(
+                  signOut();
+
+                  // Navigator.pushReplacement(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) {
+                  //       return MyApp();
+                  //     },
+                  //   ),
+                  // );
+                  Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
-                      builder: (context) {
-                        return MyApp();
-                      },
+                      builder: (BuildContext context) => MyApp(),
                     ),
+                        (route) => false,
                   );
                 },
               ),

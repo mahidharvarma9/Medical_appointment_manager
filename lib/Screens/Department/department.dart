@@ -50,7 +50,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             SizedBox(height: MediaQuery.of(context).size.height * 0.03),
             Container(
               margin:
-                  const EdgeInsets.only(left: 20.0, top: 20.0, bottom: 20.0),
+                  const EdgeInsets.only(left: 20.0, top: 100.0, bottom: 20.0),
               child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(

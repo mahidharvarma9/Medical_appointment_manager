@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:leso/Screens/Profile/profile.dart';
 import '../Department/layout.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,23 +11,24 @@ import '../../constants.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../confirm_details/confirm_details.dart';
+import 'limit_ready_q.dart';
 
-var enable1=0;
 var dateselected = DateTime.now();
 var current_doc;
 var limitEx = 0;
 var msg1 = " ";
 var msg2 = " ";
-var msg3=" ";
 var err = 0;
 var curr, limit;
+var date_limit;
+var currInd_limit;
 final presum = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-class HomePage extends StatefulWidget {
+class DateLimit extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _DateLimitState createState() => _DateLimitState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _DateLimitState extends State<DateLimit> {
   CalendarController _controller;
   Map<DateTime, List<dynamic>> _events;
   List<dynamic> _selectedEvents;
@@ -112,7 +113,7 @@ class _HomePageState extends State<HomePage> {
             Align(
               alignment: Alignment.center,
               child:Text(
-                "Select Date Of Appointment",
+                "Select Date to set limit",
                 style: TextStyle(
                     color: kPrimaryColor,
                     fontWeight: FontWeight.bold,
@@ -144,13 +145,9 @@ class _HomePageState extends State<HomePage> {
               startDay: DateTime.now(),
               endDay: DateTime.now().add(const Duration(days: 29)),
               onDaySelected: (date, events, _) async {
-                enable1=0;
-                dateselected = date;
-                Date = dateselected.toString();
                 await getCurrDoc();
                 Duration dur = date.difference(DateTime.now());
                 print("sel date: ----------------------");
-
                 print(date);
                 print("dur: ----------------------");
                 print(dur);
@@ -164,7 +161,8 @@ class _HomePageState extends State<HomePage> {
                 if (currInd == 0) {
                   currInd = 30;
                 }
-
+                date_limit = currInd;
+                currInd_limit=currInd.toString();
                 print("current date: ----------------------");
                 print(DateTime.now());
                 print("difffffffff");
@@ -172,84 +170,13 @@ class _HomePageState extends State<HomePage> {
                 print(
                     currInd.toString() + ' is the index of date selected');
 
-                await FirebaseFirestore.instance
-                    .collection(Departmant)
-                    .doc(currInd.toString())
-                    .collection('patients')
-                    .doc('limit')
-                    .get()
-                    .then((DocumentSnapshot documentSnapshot) {
-                  print(
-                      'limit value : ${documentSnapshot.data()['limit']}');
-                  limit = int.parse(documentSnapshot.data()['limit']);
-                }).catchError((error) => print("Failed get limit: $error"));
 
-                await FirebaseFirestore.instance
-                    .collection(Departmant)
-                    .doc(currInd.toString())
-                    .collection('patients')
-                    .doc('curr_ind')
-                    .get()
-                    .then((DocumentSnapshot documentSnapshot) {
-                  print(
-                      'index value : ${documentSnapshot.data()["index"]}');
-                  curr = documentSnapshot.data()["index"];
-                }).catchError((error) => print("Failed 666666get index: $error"));
 
-                if (curr >= limit) {
-                  limitEx = 1;
-                  err = 1;
-                  msg2 = "No appointments available on this day!!!";
-                  msg1=" ";
-                  msg3=" ";
-                } else {
-                  err = 0;
-                  limitEx = 0;
-                  msg1 = "Appointments are available on this day!!!";
-                  msg2=" ";
-                  msg3=" ";
-                }
-                // if (this.mounted) {
-                //   setState(() {
-                //     print("--------------------------------set state-------------------------------");
-                //     //DateTime dob = DateTime.parse('1967-10-12');
-                //     dateselected = date;
-                //     Date = dateselected.toString();
-                //     print("[[[[[[[[");
-                //     print(date);
-                //     print(Date);
-                //   });
-                // }
-                await FirebaseFirestore.instance
-                    .collection(Departmant)
-                    .doc((currInd).toString())
-                    .collection('patients')
-                    .where("name",isEqualTo:FirebaseAuth.instance.currentUser.email)
-                    .get()
-                    .then((QuerySnapshot documentSnapshot) {
-                  print(
-                      'index value : ${documentSnapshot.docs.first.data()["name"]}');
-                  if(documentSnapshot.docs.isNotEmpty) {
-                    enable1 = 0;
-                    err=1;
-                    msg3="Duplicate Appointment Exists!!";
-                    print("Duplicate Appointment Exists");
-                  }
-                }).catchError((error) => print("Failed get index777777777: $error"));
-                if(msg3!=" "){
-                  msg2=" ";
-                  msg1=" ";
-                }
+
+
                 setState(() {
                   //DateTime dob = DateTime.parse('1967-10-12');
-                  print("--------------------------------set state-------------------------------");
                   dateselected = date;
-                  Date = dateselected.toString();
-                  print("[[[[[[[[");
-                  print(date);
-                  print(Date);
-                  enable1=1;
-
                 });
               },
               builders: CalendarBuilders(
@@ -296,11 +223,6 @@ class _HomePageState extends State<HomePage> {
                         style: TextStyle(
                           color: Colors.red,
                         )),
-                    TextSpan(
-                        text: msg3,
-                        style: TextStyle(
-                          color: Colors.red,
-                        )),
                   ])),
             ),
             SizedBox(width: 10.0, height: 10.0),
@@ -309,18 +231,15 @@ class _HomePageState extends State<HomePage> {
                   text: "Next",
                   color: button,
                   press: () {
-
-                    if (err == 1 || enable1==0) {
-                      print("inside else88888888888888888888888888888888888888888888");
+                    if (err == 1) {
                     } else {
-
-                      print("...............");
+                      Date = dateselected.toString();
                       print(Date);
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return ConfirmPage();
+                            return limit_change();
                           },
                         ),
                       );
@@ -365,3 +284,4 @@ class _HomePageState extends State<HomePage> {
     });
   }
 }
+

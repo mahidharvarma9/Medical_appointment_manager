@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../components/rounded_button.dart';
+import '../../main.dart';
 import 'admin_home1.dart';
 import '../variables.dart';
 import '../../components/rounded_input_field.dart';
@@ -40,15 +42,17 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     'Urology'
   ];
 
+
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
             Container(
               margin:
-                  const EdgeInsets.only(left: 20.0, top: 20.0, bottom: 20.0),
+                  const EdgeInsets.only(left: 20.0, top: 100.0, bottom: 20.0),
               child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -96,7 +100,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   color: button,
                   press: () {
                     Departmant = dropdownValue;
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) {
@@ -107,6 +111,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     );
                   }),
             ),
+
           ],
         ),
       ),

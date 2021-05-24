@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:leso/Screens/Date/calenderapi.dart';
 import '../Date/date.dart';
 import '../Login/components/background.dart';
 import '../../Success/Success_page.dart';
@@ -57,15 +58,43 @@ class ConfirmBody extends StatelessWidget {
               color: button,
               text: "Confirm Details",
               press: () {
-                addUser();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return SuccessBody();
-                    },
+                return showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text("Alert "),
+                    content: Text("Do you want to confirm your appointment"),
+                    actions: <Widget>[
+                      FlatButton(
+                        onPressed: () {
+                          var ss = new CalendarClient();
+                          ss.insert("PGI Appointment", DateTime.parse(Date),DateTime.parse(Date) );
+                          addUser();
+                          Navigator.of(ctx).pop();
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return SuccessBody();
+                              },
+                            ),
+                          );
+
+                        },
+                        child: Text("Confirm"),
+                      ),
+                      FlatButton(
+                        onPressed: () {
+
+                          Navigator.of(ctx).pop();
+
+                        },
+
+                        child: Text("No"),
+                      )
+                    ],
                   ),
                 );
+
               },
             ),
             //SizedBox(height: size.height * 0.03),

@@ -39,26 +39,8 @@ class _State extends State<SuccessBody> {
   @override
   CollectionReference users = FirebaseFirestore.instance.collection('user');
   User currentFirebaseUser = FirebaseAuth.instance.currentUser;
-  void startTimer() {
-    setState(() {
-      const oneSec = const Duration(seconds: 1);
-      _timer = new Timer.periodic(
-        oneSec,
-        (Timer timer) {
-
-          print(_start);
-          print(int.parse(Position));
-
-        },
-      );
-    });
-  }
 
   @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
 
   Widget build(BuildContext context) => DefaultTabController(
         length: 3,
@@ -79,13 +61,7 @@ class _State extends State<SuccessBody> {
                     fontSize: 25),
               ),
               backgroundColor: kPrimaryColor,
-              bottom: TabBar(
-                tabs: [
-                  Tab(icon: Icon(Icons.home), text: "Home"),
-                  Tab(icon: Icon(Icons.domain_verification), text: "Bookings"),
-                  Tab(icon: Icon(Icons.face), text: "Profile"),
-                ],
-              ),
+
             ),
           ),
           body: Background(
@@ -134,6 +110,7 @@ class _State extends State<SuccessBody> {
                     color: button,
                     text: "Home",
                     press: () {
+
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(

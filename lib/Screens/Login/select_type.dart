@@ -34,7 +34,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           children: <Widget>[
             Container(
               margin:
-                  const EdgeInsets.only(left: 20.0, top: 20.0, bottom: 20.0),
+                  const EdgeInsets.only(left: 20.0, top: 100.0, bottom: 20.0),
               child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -84,7 +84,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) {
+                        builder: (context)  {
                           if (dropdownValue == 'User') {
                             return LoginScreen();
                           } else {
@@ -101,3 +101,5 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     );
   }
 }
+
+

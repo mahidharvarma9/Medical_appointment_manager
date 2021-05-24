@@ -60,7 +60,7 @@ class Body extends StatelessWidget {
                   final newUser = await _auth.createUserWithEmailAndPassword(
                       email: email, password: password);
                   if (newUser != null) {
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) {
@@ -78,7 +78,7 @@ class Body extends StatelessWidget {
             AlreadyHaveAnAccountCheck(
               login: false,
               press: () {
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                     builder: (context) {

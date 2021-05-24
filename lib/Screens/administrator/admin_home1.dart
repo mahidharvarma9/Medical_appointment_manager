@@ -31,10 +31,11 @@ class Book1 extends StatelessWidget {
                   borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(100.0),
                       bottomRight: Radius.circular(100.0))),
+
               title: Text(
-                "leso",
+                "Hospital Admin",
                 style: TextStyle(
-                    color: kPrimaryColor,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 25),
               ),

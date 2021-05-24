@@ -435,7 +435,6 @@ async function popAppointment(snap, context) {
     console.log("dep: " + dl);
     console.log("curr_doc: " + current_doc);
     console.log("dep: " + dl);
-    console.log("curr_day: " + curr_day);
 
 
     var path2 = dl + '/' + current_doc + '/' + 'patients';
@@ -443,61 +442,20 @@ async function popAppointment(snap, context) {
 
     var del_time;
     var collec2;
-    var email1;
-
     var collectionLast = ref.orderBy("createdAt").limit(1);
     await db.collection(dl).doc(current_doc).collection('patients').doc('curr_ind').get()
         .then(async function (docRef) {
             currInd = docRef.data().index;
-
-
-
-
+            console.log("currInd: " + currInd);
         })
         .catch(function (error) {
             console.error("Error index: ", error);
         });
-
-
     collectionLast.get().then(async function (querySnapshot) {
         querySnapshot.forEach(async function (doc) {
             console.log('$$');
             console.log(JSON.stringify(doc.data()));
             del_time = doc.data().createdAt;
-
-
-
-            console.log(JSON.stringify(doc.data()));
-            email1 = doc.data().name;
-
-            console.log("email to be deleted:   " + email1);
-            console.log("currInd: " + currInd);
-
-            var pathz = 'Users' + '/' + email1 + '/' + 'appointments';
-
-            console.log("path");
-            console.log(pathz)
-
-            var refff = db.collection(pathz);
-
-            console.log(".................")
-            console.log(refff.get())
-
-
-            var collectionLasttt = await refff.where("date", '==', curr_day).where("dep", '==', dl.toString());
-            console.log("////////////////////");
-
-            await collectionLasttt.get().then(async function (querySnapshot) {
-                querySnapshot.forEach(async function (doc) {
-                    console.log('$$');
-                    console.log(JSON.stringify(doc.data()));
-                    //del_time = doc.data().createdAt;
-                    await doc.ref.delete();
-
-                });
-            });
-
-
             await doc.ref.delete();
             console.log('current indexxxxx:  ' + currInd.toString())
             var temp1 = currInd - 1;
@@ -706,6 +664,175 @@ async function pushtoReadyQueue(snap, context) {
 }
 
 
+async function update_curr(snap, context) {
+    ///delete waiting queue curr_doc
+    //curr+1
+    //shift to next day waiting queue
+    var curr_doc1;
+    await db.collection('current_doc').doc('doc_id').get()
+        .then(function (docRef) {
+            curr_doc1 = docRef.data().curr_doc;
+            console.log('Current Doc: ' + curr_doc1);
+        })
+        .catch(function (error) {
+            console.error('Error adding document: ' + error);
+        });
+
+    var d = new Date();
+    console.log("before conversion date------------------------");
+    console.log(d);
+    d.setHours(d.getHours() + 5);
+    d.setMinutes(d.getMinutes() + 30);
+    console.log("date------------------------");
+    console.log(d);
+    var curr_day = d.getDate() + parseInt(presum[d.getMonth()]);
+
+
+
+
+
+    var path2 = curr_depp + '/' + curr_doc1 + '/' + 'waiting_queue';
+    var ref = db.collection(path2);
+
+    print("details:   ");
+    console.log(curr_day);
+    console.log(curr_depp);
+
+    //var collectionLast = ref.where("name", '==', (email.toString()));
+    var collectionLast = ref;
+
+    //delete waiting queue
+    var del_name;
+    await collectionLast.get().then(async function (querySnapshot) {
+        querySnapshot.forEach(async function (doc) {
+
+            del_name = doc.ref.data().name;
+
+            print("del_name  :" + del_name);
+
+            doc.ref.delete();
+
+        });
+    });
+
+
+    //shift each doc in readyqueue to next day waiting queue
+
+    var pathp = curr_depp + '/' + current_doc1 + '/' + 'patients';
+    var refp = db.collection(pathp);
+    var current_d;
+
+
+    var collectionp = refp.orderBy("createdAt");
+
+    var name;
+
+    await collectionp.get().then(function (querySnapshot) {
+        querySnapshot.forEach(function (doc) {
+
+            console.log('$$');
+            doc.ref.get().then(async function (docRef) {
+                current_d = docRef.data();
+
+                print("doc in ready_queue");
+                print(JSON.stringify(current_d));
+
+                var name = docRef.data()["name"];
+
+                var next_day = ((parseInt(current_doc1) + 1) % 30).toString();
+
+                if (next_day == "0") {
+                    next_day = "30";
+                }
+
+                var pathw = curr_depp + '/' + next_day + '/' + 'waiting_queue';
+
+                console.log('**');
+                console.log('current_d:  ' + JSON.stringify(current_d));
+
+                await db.collection(pathw).doc().set(current_d).then(function (docRef) {
+                    console.log('Added document: ' + JSON.stringify(docRef));
+                })
+                    .catch(function (error) {
+                        console.error("Error moving to nextday queue: ", error);
+                    });
+
+
+                await popAppointment(snap, context);
+
+                //deleting in users
+
+                var pathx = 'Users' + '/' + name + '/' + 'appointments';
+
+                var ref1 = db.collection(pathx);
+
+                var collectionLast_ = ref1.where("date", '==', curr_day).where("dep", '==', curr_depp);
+
+                var collec2;
+
+                var del_name1;
+                await collectionLast_.get().then(async function (querySnapshot) {
+                    querySnapshot.forEach(async function (doc) {
+                        console.log('$$');
+                        console.log(JSON.stringify(doc.data()));
+                        del_name1 = doc.data()["name"];
+                        print("deleting name in users");
+                        print(del_name1);
+                        await doc.ref.delete();
+
+                    });
+                });
+
+
+            })
+                .catch(function (error) {
+                    console.error('Error adding document: ' + error);
+                });
+
+        });
+    });
+
+
+
+    //set limit to 25 and curr_ind to zero
+
+    await db.collection(curr_depp).doc(curr_doc1).collection('patients').doc('limit').set({ "limit": "25" })
+        .then(function (docRef) {
+            console.log("limit set to 25");
+        })
+        .catch(function (error) {
+            console.error("Error in setting limit to 25: ", error);
+        });
+
+    await db.collection(curr_depp).doc(curr_doc1).collection('patients').doc('curr_ind').set({ "index": 0 })
+        .then(function (docRef) {
+            console.log("set index to 0");
+        })
+        .catch(function (error) {
+            console.error("Error in setting index to 0: ", error);
+        });
+
+
+    //set curr_doc to +1
+
+    await db.collection('current_doc').doc('doc_id').set()
+        .then(function (docRef) {
+            curr_doc1 = docRef.data().curr_doc;
+            console.log('Current Doc: ' + curr_doc1);
+        })
+        .catch(function (error) {
+            console.error('Error adding document: ' + error);
+        });
+
+
+
+
+}
+
+exports.Reset_databse = functions.https.onRequest(async (req, res) => {
+    update_curr();
+});
+
 exports.fun_caller = functions.https.onRequest(async (req, res) => {
     var q = req.query.name;
     console.log("request:  " + req);
@@ -739,3 +866,4 @@ exports.fun_caller = functions.https.onRequest(async (req, res) => {
 exports.Reset_databse = functions.https.onRequest(async (req, res) => {
     Reset();
 });
+

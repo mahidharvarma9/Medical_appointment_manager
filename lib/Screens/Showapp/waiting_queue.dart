@@ -1,7 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:leso/Screens/administrator/Details/Details_.dart';
+import 'package:leso/Screens/administrator/move2readyqueue/R_Layout.dart';
+import 'package:leso/Screens/cancel/layout.dart';
 import 'package:leso/components/text_field_container.dart';
 import '../Date/date.dart';
 import '../Login/login_screen.dart';
@@ -14,15 +15,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 //import 'package:dartbase_admin/dartbase_admin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-DocumentReference Drs;
 
 
-class AppointmentPage extends StatefulWidget {
+
+class AppointmentPage_waitingQ extends StatefulWidget {
   @override
   _appointmentState createState() => _appointmentState();
 }
 
-class _appointmentState extends State<AppointmentPage> {
+class _appointmentState extends State<AppointmentPage_waitingQ> {
   //var now = new DateTime.now();
   final List<String> items = ["1", "2", "Third", "4"];
 
@@ -32,26 +33,23 @@ class _appointmentState extends State<AppointmentPage> {
 
   //@override
   Widget build(BuildContext context) {
-    final title = 'Upcoming Bookings..';
+    final title = 'Waiting Queue..';
     var curr_doc;
-    add_ () async {
+    // var current_doc= FirebaseFirestore.instance
+    //             .collection('current_doc')
+    //             .doc('doc_id').get().then((QuerySnapshot querySnapshot)=>{
+    //               print(docref.docs[0].data["field"])
+    //             });
+    // FirebaseFirestore.instance
+    //     .collection('current_doc')
+    //     .get()
+    //     .then((QuerySnapshot querySnapshot) {
+    // querySnapshot.docs.forEach((doc) {
+    //   print("printing.....");
 
-      Drs = await FirebaseFirestore.instance
-          .collection('UserDetails').doc(Email_);
-      await Drs.get()  .then((DocumentSnapshot documentSnapshot) {
-        print('Document data: ${documentSnapshot.data()["name"]}');
-        name = documentSnapshot.data()["name"];
-        age = documentSnapshot.data()["age"];
-        gender = documentSnapshot.data()["gender"];
-        number = documentSnapshot.data()["number"];
-      });
-      await Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Details_()));
-
-
-
-    }
+    //     curr_doc = doc['curr_doc'];
+    //   });
+    // });
     return MaterialApp(
         title: title,
         home: Scaffold(
@@ -76,58 +74,27 @@ class _appointmentState extends State<AppointmentPage> {
                   });
                   //print(items22);
                   //
-
+                  int postition=0;
                   return StreamBuilder(
                     stream: FirebaseFirestore.instance
                         .collection(Departmant)
                         .doc(curr_doc)
-                        .collection('patients')
+                        .collection('waiting_queue')
                         .snapshots(),
                     builder: (BuildContext context,
                         AsyncSnapshot<QuerySnapshot> snapshot) {
                       if (!snapshot.hasData) return Text('Loading...');
                       List<QueryDocumentSnapshot> items22 = snapshot.data.docs;
-                       int messageCount = snapshot.data.docs.length;
-                      print("=++============");
-                      messageCount = messageCount ;
-                      print(messageCount);
+                      final int messageCount = snapshot.data.docs.length;
                       print("curr_doc...");
                       print(curr_doc);
+                      print(messageCount);
 
                       return ListView.builder(
                         itemCount: messageCount,
                         itemBuilder: (context, position) {
                           // snapshot.data.documents[index]['name'];
                           // document['userRef'] exists here
-                          return TextFieldContainer(child: GestureDetector(
-
-
-                              child: Text(snapshot.data.docs.elementAt(position).data().containsKey('name') ?
-                                  'Patient ID:'+snapshot.data.docs.elementAt(position).data()['name'].toString():
-                              snapshot.data.docs.elementAt(position).data().containsKey('index')?'Total Patients:'+snapshot.data.docs.elementAt(position).data()['index'].toString():snapshot.data.docs.elementAt(position).data().containsKey('limit')?'Maximum Patients allowed:'+snapshot.data.docs.elementAt(position).data()['limit'].toString():""
-                            ),
-                            onTap: () =>
-                            {
-                              Email_ = snapshot.data.docs.elementAt(position).data()['name'],
-                              print(Email_),
-
-                              add_(),
-
-
-
-                            },
-
-
-
-
-                          )
-
-
-
-
-                          );
-
-
                           // return Card(
                           //
                           //   child: Padding(
@@ -139,8 +106,26 @@ class _appointmentState extends State<AppointmentPage> {
                           //
                           //
                           //
-                          //     ),
-                          //   );
+                          //   ),
+                          // );
+
+                              return TextFieldContainer(child: GestureDetector(
+
+
+                                  child: Center(child:  Text(snapshot.data.docs.elementAt(position).data()['name'] ??
+                                        '<No message retrieved>'),),
+                                  onTap: () =>
+                                  {
+
+
+                                    user_email = snapshot.data.docs.elementAt(position).data()['name'],
+                                    Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (context) =>  c_ancel())),
+
+                                  }
+                              ),
+                              );
 
 
 

@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:leso/Success/success.dart';
+import 'package:leso/Screens/Login/components/OTP.dart';
+import '../../../Success/success.dart';
 import 'background.dart';
 import '../../Signup/signup_screen.dart';
 import '../../book/Book.dart';
@@ -55,10 +57,52 @@ class Body extends StatelessWidget {
               color: button,
               press: () async {
                 try  {
+                  await FirebaseAuth.instance.signOut();
                   final user = await FirebaseAuth.instance
                       .signInWithEmailAndPassword(
                       email: email, password: password);
                   if(user!=null){
+                    if(!user.user.emailVerified)
+                      user.user.sendEmailVerification().then((value) =>{
+
+
+
+
+                      });
+                    if(!user.user.emailVerified)
+                      return showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: Text("Verify Your Email "),
+                          content: Text("Click Next When Verified"),
+                          actions: <Widget>[
+                            FlatButton(
+                              onPressed: () {
+
+                                Navigator.of(ctx).pop();
+
+                              },
+                              child: Text("Next"),
+                            ),
+
+                          ],
+                        ),
+                      );
+                    await FirebaseFirestore.instance
+                        .collection('UserDetails').doc(FirebaseAuth.instance.currentUser.email).get()
+                        .then((DocumentSnapshot documentSnapshot) {
+
+                      if(documentSnapshot.data()!=null) {
+                        flag=1;
+                        print("Profile Exists");
+                      }
+                      else{
+                        flag=0;
+                        print("Profile Doesn't Exists");
+
+                      }
+                    }).catchError((error) => print("Failed get index: $error"));
+                    print(FirebaseAuth.instance.currentUser.email);
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
@@ -75,6 +119,38 @@ class Body extends StatelessWidget {
                 }
                 print(email);
                 print(password);
+              },
+            ),
+            RoundedButton(
+              text: "RESET PASSWORD",
+              color: button,
+              press: () async {
+
+                return showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text("Password Reset "),
+                    content: Text("Click Next and check your mail"),
+                    actions: <Widget>[
+                      RoundedInputField(
+                        hintText: "Your Email",
+                        keyboardType: TextInputType.emailAddress,
+                        onChanged: (value) {
+                          email = value ;
+                        },
+                      ),
+                      FlatButton(
+                        onPressed: () async {
+                          await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+                          Navigator.of(ctx).pop();
+
+                        },
+                        child: Text("Next"),
+                      ),
+
+                    ],
+                  ),
+                );
               },
             ),
             SizedBox(height: size.height * 0.03),

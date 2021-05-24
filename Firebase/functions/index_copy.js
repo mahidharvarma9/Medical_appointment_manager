@@ -10,41 +10,7 @@ var firebaseDatabase = admin.firestore();
 var dept = { 'One': 0, 'General Surgery': 1, 'Dermatology,Venereology and leprology': 2, 'Gynaecology': 3, 'Internal Medicine': 4, 'Obstetrics(For Pregnant Women)': 5, 'Ophthalmology(EYE)': 6, 'Oral Health Sciences Center(Dental)': 7, 'Orthopaedics': 8, 'Paediatrics Orthopaedics': 9, 'Paediatric Surgery': 10, 'Paediatric Medicine': 11, 'Plastic Surgery': 12, 'Urology': 13 };
 
 var presum = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-async function Reset(snap, context) {
-    var i = 0;
-    for (const [key, value] of Object.entries(dept)) {
-        for (i = 0; i < 30; i++) {
 
-            await db.collection(key.toString()).doc((i + 1).toString()).collection('patients').doc('curr_ind').set({ "index": 0 })
-                .then(function (docRef) {
-                    console.log("nurr_ind set to 0 initially");
-                })
-                .catch(function (error) {
-                    console.error("Error in setting curr_ind index to 0: ", error);
-                });
-
-            await db.collection(key.toString()).doc((i + 1).toString()).collection('patients').doc('limit').set({ "limit": "25" })
-                .then(function (docRef) {
-                    console.log("nurr_ind set to 0 initially");
-                })
-                .catch(function (error) {
-                    console.error("Error in setting curr_ind index to 0: ", error);
-                });
-
-
-
-
-        }
-    }
-
-
-
-    context.sendStatus(200);
-    return;
-
-
-
-}
 
 
 async function scheduleAppointment(snap, context) {
@@ -53,9 +19,6 @@ async function scheduleAppointment(snap, context) {
     var dl = s.split('|')[2];
     month = "";
     var str = "";
-    var datee = "";
-    var datee = datee + s;
-    console.log(s[email.length + 1] + s[email.length + 21]);
     str = str + s[email.length + 9] + s[email.length + 10];
     month = month + s[email.length + 6] + s[email.length + 7];
     var months = parseInt(month);
@@ -76,6 +39,7 @@ async function scheduleAppointment(snap, context) {
 
 
 
+    //var d = new Date();
     var d = new Date();
     console.log("before conversion date------------------------");
     console.log(d);
@@ -84,28 +48,33 @@ async function scheduleAppointment(snap, context) {
     console.log("date------------------------");
     console.log(d);
     var curr_day = d.getDate() + parseInt(presum[d.getMonth()]);
+    console.log(curr_day);
+    console.log(presum[d.getMonth()]);
+    console.log(d.getDate());
+
+
 
     console.log('current_doc no:  ' + current_doc);
     console.log(booked_day);
     console.log(curr_day);
     console.log(s);
-    await db.collection('Users').doc(email).collection('appointments').doc().set({ 'dep': dl, 'date': booked_day, "date_": datee.slice(email.length + 1, email.length + 21) })
+    await db.collection('Users').doc(email).collection('appointments').doc().set({ 'dep': dl, 'date': booked_day })
         .then(function (docRef) {
 
         }).catch(function (error) {
             console.error("Error adding document: ", error);
         });
 
-    if ((booked_day - curr_day + parseInt(current_doc)) % 30 == 0) {
+    if ((booked_day - curr_day + parseInt(current_doc)) % 7 == 0) {
         console.log("in ifff");
 
-        var path6 = dl + '/30/' + 'patients';
+        var path6 = dl + '/7/' + 'patients';
         const collectionLast6 = db.collection(path6).doc('curr_ind');
 
         const doc6 = await collectionLast6.get();
 
         if (!doc6.exists) {
-            await db.collection(dl).doc('30').collection('patients').doc('curr_ind').set({ "index": 0 })
+            await db.collection(dl).doc('7').collection('patients').doc('curr_ind').set({ "index": 0 })
                 .then(function (docRef) {
                     console.log("nurr_ind set to 0 initially");
                 })
@@ -117,7 +86,7 @@ async function scheduleAppointment(snap, context) {
 
         var currInd;
 
-        await db.collection(dl).doc('30').collection('patients').doc('curr_ind').get()
+        await db.collection(dl).doc('7').collection('patients').doc('curr_ind').get()
             .then(function (docRef) {
                 currInd = parseInt(docRef.data().index);
                 console.log("currInd: " + currInd);
@@ -129,13 +98,12 @@ async function scheduleAppointment(snap, context) {
         const data = {
             "name": email,
             "index": currInd + 1,
-            "date_": datee.slice(email.length + 1, email.length + 21),
             "createdAt": admin.firestore.Timestamp.now()
         };
         console.log('data before adding' + JSON.stringify(data));
 
         //var temp1=(currInd+1).toString();
-        await db.collection(dl).doc('30').collection('patients').doc('curr_ind').update({ "index": (currInd + 1) }).then(function (docRef) {
+        await db.collection(dl).doc('7').collection('patients').doc('curr_ind').update({ "index": (currInd + 1) }).then(function (docRef) {
             // console.log('Added document: ' + JSON.stringify(docRef));
         }).catch(function (error) {
             console.error("Error adding document: ", error);
@@ -144,7 +112,7 @@ async function scheduleAppointment(snap, context) {
 
         //output = current_d1["tot"] + 1;
 
-        await db.collection(dl).doc('30').collection('patients').doc().set(data)
+        await db.collection(dl).doc('7').collection('patients').doc().set(data)
             .then(function (docRef) {
                 console.log('Patient_id: ' + docRef.patient_id);
                 console.log('created at' + "  " + docRef.createdAt);
@@ -156,7 +124,7 @@ async function scheduleAppointment(snap, context) {
     }
     else {
 
-        var booking = (booked_day - curr_day + parseInt(current_doc)) % 30;
+        var booking = (booked_day - curr_day + parseInt(current_doc)) % 7;
         var index = booking.toString();
 
         var path6 = dl + '/' + index + '/' + 'patients';
@@ -187,8 +155,7 @@ async function scheduleAppointment(snap, context) {
         const data = {
             "name": email,
             "index": currInd + 1,
-            "createdAt": admin.firestore.Timestamp.now(),
-            "date_": datee.slice(email.length + 1, email.length + 21)
+            "createdAt": admin.firestore.Timestamp.now()
         };
         console.log('data before adding' + JSON.stringify(data));
 
@@ -219,8 +186,6 @@ async function cancelAppointment(snap, context) {
     var dl = s.split('|')[2];
     month = "";
     var str = "";
-    var datee = str + s[email.length + 1] + s[email.length + 21];
-    console.log(datee)
     str = str + s[email.length + 9] + s[email.length + 10];
     month = month + s[email.length + 6] + s[email.length + 7];
     var months = parseInt(month);
@@ -228,12 +193,6 @@ async function cancelAppointment(snap, context) {
     var booked_day = Dat + parseInt(presum[months - 1]);
     var uniqueId, current_doc;
     var d = new Date();
-    console.log("before conversion date------------------------");
-    console.log(d);
-    d.setHours(d.getHours() + 5);
-    d.setMinutes(d.getMinutes() + 30);
-    console.log("date------------------------");
-    console.log(d);
     var curr_day = d.getDate() + parseInt(presum[d.getMonth()]);
     // search and delete
 
@@ -245,16 +204,12 @@ async function cancelAppointment(snap, context) {
         .catch(function (error) {
             console.error('Error adding document: ' + error);
         });
-    if ((booked_day - curr_day + parseInt(current_doc)) % 30 == 0) {
+    if ((booked_day - curr_day + parseInt(current_doc)) % 7 == 0) {
         console.log("in ifff");
 
-        var path2 = dl + '/30/' + 'patients';
-        var pathx = 'Users' + '/' + email.toString() + '/' + 'appointments';
+        var path2 = dl + '/7/' + 'patients';
         var ref = db.collection(path2);
-        var ref1 = db.collection(pathx);
-        console.log(booked_day)
-        console.log(dl)
-        var collectionLast_ = ref1.where("date", '==', booked_day).where("dep", '==', dl.toString());
+
         var collectionLast = ref.where("name", '==', (email.toString()));
         var collec2;
 
@@ -271,17 +226,6 @@ async function cancelAppointment(snap, context) {
                         await doc.ref.update("index", curr_index - 1);
                     })
                 });
-
-            });
-        });
-        await collectionLast_.get().then(async function (querySnapshot) {
-            querySnapshot.forEach(async function (doc) {
-                console.log('$$');
-                console.log(JSON.stringify(doc.data()));
-                del_time = doc.data().createdAt;
-                await doc.ref.delete();
-
-
 
             });
         });
@@ -303,7 +247,7 @@ async function cancelAppointment(snap, context) {
     }
     else {
 
-        var booking = (booked_day - curr_day + parseInt(current_doc)) % 30;
+        var booking = (booked_day - curr_day + parseInt(current_doc)) % 7;
 
         var index = booking.toString();
         console.log("in else");
@@ -311,36 +255,14 @@ async function cancelAppointment(snap, context) {
         console.log(curr_day);
         console.log(email.toString());
 
-        var pathx = 'Users' + '/' + email.toString() + '/' + 'appointments';
-        console.log(pathx)
+
         var path2 = dl + '/' + index + '/' + 'patients';
         var ref = db.collection(path2);
-        var ref_ = db.collection(pathx);
-        console.log(".................")
-        console.log(ref_.get())
 
-        console.log(booked_day)
-        console.log(dl)
         var collectionLast = ref.where("name", '==', (email.toString()));
         var collec2;
-        var collectionLast_ = await ref_.where("date", '==', booked_day).where("dep", '==', dl.toString());
-        console.log("////////////////////");
-
-        await collectionLast_.get().then(async function (querySnapshot) {
-            querySnapshot.forEach(async function (doc) {
-                console.log('$$');
-                console.log(JSON.stringify(doc.data()));
-                del_time = doc.data().createdAt;
-                await doc.ref.delete();
-
-
-
-            });
-        });
-
 
         var del_time;
-
         await collectionLast.get().then(async function (querySnapshot) {
             querySnapshot.forEach(async function (doc) {
                 console.log('$$');
@@ -395,14 +317,8 @@ async function popAppointment(snap, context) {
     var booked_day = Dat + parseInt(presum[months - 1]);
     var uniqueId, current_doc;
     var d = new Date();
-    console.log("before conversion date------------------------");
-    console.log(d);
-    d.setHours(d.getHours() + 5);
-    d.setMinutes(d.getMinutes() + 30);
-    console.log("date------------------------");
-    console.log(d);
     var curr_day = d.getDate() + parseInt(presum[d.getMonth()]);
-    var booking = (booked_day - curr_day + parseInt(current_doc)) % 30;
+    var booking = (booked_day - curr_day + parseInt(current_doc)) % 7;
     console.log('booking and current day');
     console.log(booked_day);
     console.log(curr_day);
@@ -435,7 +351,6 @@ async function popAppointment(snap, context) {
     console.log("dep: " + dl);
     console.log("curr_doc: " + current_doc);
     console.log("dep: " + dl);
-    console.log("curr_day: " + curr_day);
 
 
     var path2 = dl + '/' + current_doc + '/' + 'patients';
@@ -443,61 +358,20 @@ async function popAppointment(snap, context) {
 
     var del_time;
     var collec2;
-    var email1;
-
     var collectionLast = ref.orderBy("createdAt").limit(1);
     await db.collection(dl).doc(current_doc).collection('patients').doc('curr_ind').get()
         .then(async function (docRef) {
             currInd = docRef.data().index;
-
-
-
-
+            console.log("currInd: " + currInd);
         })
         .catch(function (error) {
             console.error("Error index: ", error);
         });
-
-
     collectionLast.get().then(async function (querySnapshot) {
         querySnapshot.forEach(async function (doc) {
             console.log('$$');
             console.log(JSON.stringify(doc.data()));
             del_time = doc.data().createdAt;
-
-
-
-            console.log(JSON.stringify(doc.data()));
-            email1 = doc.data().name;
-
-            console.log("email to be deleted:   " + email1);
-            console.log("currInd: " + currInd);
-
-            var pathz = 'Users' + '/' + email1 + '/' + 'appointments';
-
-            console.log("path");
-            console.log(pathz)
-
-            var refff = db.collection(pathz);
-
-            console.log(".................")
-            console.log(refff.get())
-
-
-            var collectionLasttt = await refff.where("date", '==', curr_day).where("dep", '==', dl.toString());
-            console.log("////////////////////");
-
-            await collectionLasttt.get().then(async function (querySnapshot) {
-                querySnapshot.forEach(async function (doc) {
-                    console.log('$$');
-                    console.log(JSON.stringify(doc.data()));
-                    //del_time = doc.data().createdAt;
-                    await doc.ref.delete();
-
-                });
-            });
-
-
             await doc.ref.delete();
             console.log('current indexxxxx:  ' + currInd.toString())
             var temp1 = currInd - 1;
@@ -541,12 +415,6 @@ async function waiting_queue(snap, context) {
     var booked_day = Dat + parseInt(presum[months - 1]);
     var uniqueId, current_doc;
     var d = new Date();
-    console.log("before conversion date------------------------");
-    console.log(d);
-    d.setHours(d.getHours() + 5);
-    d.setMinutes(d.getMinutes() + 30);
-    console.log("date------------------------");
-    console.log(d);
     var curr_day = d.getDate() + parseInt(presum[d.getMonth()]);
 
     await db.collection('current_doc').doc('doc_id').get()
@@ -616,12 +484,6 @@ async function pushtoReadyQueue(snap, context) {
     var booked_day = Dat + parseInt(presum[months - 1]);
     var uniqueId, current_doc;
     var d = new Date();
-    console.log("before conversion date------------------------");
-    console.log(d);
-    d.setHours(d.getHours() + 5);
-    d.setMinutes(d.getMinutes() + 30);
-    console.log("date------------------------");
-    console.log(d);
     var curr_day = d.getDate() + parseInt(presum[d.getMonth()]);
 
     await db.collection('current_doc').doc('doc_id').get()
@@ -633,7 +495,7 @@ async function pushtoReadyQueue(snap, context) {
             console.error('Error adding document: ' + error);
         });
 
-    var booking = (booked_day - curr_day + parseInt(current_doc)) % 30;
+    var booking = (booked_day - curr_day + parseInt(current_doc)) % 7;
     var index = booking.toString();
     var path2 = dl + '/' + current_doc + '/' + 'waiting_queue';
     var ref = db.collection(path2);
@@ -731,11 +593,6 @@ exports.fun_caller = functions.https.onRequest(async (req, res) => {
         case 6:
             pushtoReadyQueue(req, res);
 
-
     }
 
-});
-
-exports.Reset_databse = functions.https.onRequest(async (req, res) => {
-    Reset();
 });

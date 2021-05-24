@@ -6,6 +6,11 @@ import 'Screens/Login/login_screen.dart';
 import 'Screens/Showapp/show_app.dart';
 import 'constants.dart';
 import 'Screens/Login/select_type.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,15 +27,18 @@ class MyApp extends StatelessWidget {
     List<String> listValue = <String>['User', 'Admin'];
     precacheImage(AssetImage("assets/images/signup.jpg"), context);
     precacheImage(AssetImage("assets/images/login.jpg"), context);
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'leso',
-      theme: ThemeData(
-        primaryColor: kPrimaryColor,
-        scaffoldBackgroundColor: Colors.white,
-      ),
 
-      home: MyStatefulWidget(),
-    );
+
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'leso',
+        theme: ThemeData(
+          primaryColor: kPrimaryColor,
+          scaffoldBackgroundColor: Colors.white,
+        ),
+
+        home: MyStatefulWidget(),
+      );
+
   }
 }
